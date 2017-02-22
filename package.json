@@ -1,0 +1,11 @@
+{
+  "name": "restful_nodejs",
+  "version": "1.0.0",
+  "description": "RESTful Web API Design with Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ChargerIIC",
+  "license": "MIT"
+}
