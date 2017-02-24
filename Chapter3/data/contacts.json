@@ -1,0 +1,12 @@
+{
+  "firstname": "Joe",
+  "lastname": "Smith",
+  "title": "Mr.",
+  "company": "Dev Inc.",
+  "jobtitle": "Developer",
+  "primarycontactnumber": "+359777123456",
+  "othercontactnumbers": ["+359777456789", "+359777112233"],
+  "primaryemailaddress": "joe.smith@xyz.com",
+  "emailaddresses": ["j.smith@xyz.com"],
+     "groups": ["Dev", "Family"]
+}
