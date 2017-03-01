@@ -1,46 +1,57 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-
-var index = require('./routes/index');
-var users = require('./routes/users');
+var express = require('express')
+  , http = require('http')
+  , path = require('path')
+  , bodyParser = require('body-parser')
+  , logger = require('morgan')
+  , methodOverride = require('method-override')
+  , errorHandler = require('errorhandler')
+  , levelup = require('levelup');
 
 var app = express();
+var url = require('url');
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
+// all environments
+app.set('port', process.env.PORT || 3000);
+app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(methodOverride());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// development only
+if ('development' == app.get('env')) {
+  app.use(errorHandler());
+}
 
-app.use('/', index);
-app.use('/users', users);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+var db = levelup('./contact',  {valueEncoding: 'json'});
+db.put('+359777123456', {
+  "firstname": "Joe",
+  "lastname": "Smith",
+  "title": "Mr.",
+  "company": "Dev Inc.",
+  "jobtitle": "Developer",
+  "primarycontactnumber": "+359777123456",
+  "othercontactnumbers": [
+    "+359777456789",
+    "+359777112233"],
+  "primaryemailaddress": "joe.smith@xyz.com",
+  "emailaddresses": [
+    "j.smith@xyz.com"],
+  "groups": ["Dev","Family"]
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+app.get('/contacts/:number', function(request, response) {
+  console.log(request.url + ' : querying for ' +  request.params.number);
+  db.get(request.params.number,
+    function(error, data) {
+      if (error) {
+        response.writeHead(404, {
+          'Content-Type' : 'text/plain'});
+        response.end('Not Found');
+        return;
+        }
+      response.setHeader('content-type', 'application/json');
+      response.send(data);
+  });
 });
 
-module.exports = app;
+console.log('Running at port ' + app.get('port'));
+http.createServer(app).listen(app.get('port'));
