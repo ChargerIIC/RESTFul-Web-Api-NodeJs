@@ -36,23 +36,49 @@ app.get('/contacts',
 
 app.get('/contacts/:number', function(request, response) {
     response.setHeader('content-type','application/json');
-    response.end(JSON.stringify
-    (contacts.query(request.params.number)));
+    response.end(JSON.stringify(contacts.query(request.params.number)));
 });
 
 app.get('/groups', function(request, response) {
-    console.log ('groups');
-    response.setHeader('content-type',
-    'application/json');
-    response.end(JSON.stringify(contacts.list_groups()));
+response.format( {
+      'text/xml' : function() {
+         response.send(contacts.list_groups_in_xml);
+      },
+      'application/json' : function() {
+         JSON.stringify(contacts.list_groups());
+      },
+      'default' : function() {.
+         response.status(406).send('Not Acceptable');
+      }
+});
 });
 
 app.get('/groups/:name', function(request, response) {
-    console.log ('groups');
-    response.setHeader('content-type',
-    'application/json');
-    response.end(JSON.stringify
-    (contacts.get_members(request.params.name)));
+  response.format( {
+        'text/xml' : function() {
+           response.send(contacts.list_groups_in_xml);
+        },
+        'application/json' : function() {
+          response.setHeader('content-type',    'application/json');
+          response.end(JSON.stringify(contacts.list_groups()));
+        },
+        'default' : function() {.
+           response.status(406).send('Not Acceptable');
+        }
+
+});
+
+app.get('/hello', function(request, response){
+   var get_params = url.parse(request.url, true).query;
+
+   if (Object.keys(get_params).length == 0)
+   {
+      response.end('Hello all');
+   }
+   else
+   {
+      response.end('Hello ' + get_params.name);
+   }
 });
 
 http.createServer(app).listen(3000, function(){
